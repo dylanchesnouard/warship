@@ -1,0 +1,13 @@
+[run]
+source = .
+branch = True
+omit =
+    manage.py
+    warship/asgi.py
+    warship/wsgi.py
+    warship/settings/**
+
+[report]
+fail_under = 100
+show_missing = True
+skip_covered = True
