@@ -29,50 +29,21 @@
                     <tr>
                         <td style="text-align: center; vertical-align: center;">|<br>Y<br>|</td>
                         <td>
-                            <table>
-                                {% for row in object.hidden_grid %}
-                                <tr>
-                                    {% for value in row %}
-                                        {% if forloop.parentloop.first %}
-                                            <th>{{ value }}</th>
-                                        {% else %}
-                                            {% if forloop.first %}
-                                                <th>{{ value }}</th>
-                                            {% else %}
-                                                <td>{{ value }}</td>
-                                            {% endif %}
-                                        {% endif %}
-                                    {% endfor %}
-                                </tr>
-                                {% endfor %}
-                            </table>
+                            {% include "game/components/grid_table.html" with grid=object.hidden_grid %}
                         </td>
                     </tr>
                     <tr>
                         <td colspan="2"><h3>Legend :</h3>
-                            <ul>
-                                <li>~ is a <b>water</b> cell</li>
-                                <li>O is <b>missed shot</b></li>
-                                <li>X is <b>success shot</b></li>
-                            </ul>
+                            {% include "game/components/grid_table_legend.html" with full_legend=False %}
                         </td>
                     </tr>
                 </table>
             </td>
             <td style="padding-left: 20px; vertical-align: top;">
-                <ul>
-                    {% for shot in object.shots.all %}
-                        <li>{{ shot }}</li>
-                    {% empty %}
-                        <li>No shot yet.</li>
-                    {% endfor %}
-                </ul>
+                {% include "game/components/shots_history.html" %}
             </td>
             <td style="padding-left: 20px; vertical-align: top;">
-                <form method="post">{% csrf_token %}
-                    {{ form.as_p }}
-                    <input type="submit" value="Shoot">
-                </form>
+                {% include "game/components/shot_form.html" %}
             </td>
         </tr>
     </table>

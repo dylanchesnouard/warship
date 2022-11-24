@@ -1,0 +1,7 @@
+<ul>
+    {% for shot in object.shots.all %}
+        <li>{{ shot }}</li>
+    {% empty %}
+        <li>No shot yet.</li>
+    {% endfor %}
+</ul>

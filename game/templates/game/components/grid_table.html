@@ -1,0 +1,17 @@
+<table>
+    {% for row in grid %}
+    <tr>
+        {% for value in row %}
+            {% if forloop.parentloop.first %}
+                <th>{{ value }}</th>
+            {% else %}
+                {% if forloop.first %}
+                    <th>{{ value }}</th>
+                {% else %}
+                    <td>{{ value }}</td>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
