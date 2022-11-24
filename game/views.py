@@ -75,7 +75,7 @@ class VisibleGridDetailView(GridDetailView):
         return super(VisibleGridDetailView, self).form_valid(form)
 
 
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["GET"])
 def grid_regenerate(request, pk):
     grid = get_object_or_404(Grid, id=pk)
     grid.regenerate_grid()
