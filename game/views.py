@@ -1,6 +1,7 @@
 from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import FormMixin
+from django.views.decorators.http import require_http_methods
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
 from django.shortcuts import reverse
@@ -91,6 +92,7 @@ class VisibleGridDetailView(FormMixin, DetailView):
         return super(VisibleGridDetailView, self).form_valid(form)
 
 
+@require_http_methods(["GET", "POST"])
 def grid_regenerate(request, pk):
     grid = get_object_or_404(Grid, id=pk)
     grid.regenerate_grid()
