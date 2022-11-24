@@ -30,13 +30,9 @@ class GridDeleteView(DeleteView):
     success_url = reverse_lazy("game:grid-form")
 
 
-class HiddenGridDetailView(FormMixin, DetailView):
+class GridDetailView(FormMixin, DetailView):
     model = Grid
-    template_name = "game/grid_detail_hidden.html"
     form_class = ShotForm
-
-    def get_success_url(self):
-        return reverse("game:grid-detail-hidden", args={self.object.id})
 
     def get_object(self, queryset=None):
         try:
@@ -55,37 +51,24 @@ class HiddenGridDetailView(FormMixin, DetailView):
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
+
+
+class HiddenGridDetailView(GridDetailView):
+    template_name = "game/grid_detail_hidden.html"
+
+    def get_success_url(self):
+        return reverse("game:grid-detail-hidden", args={self.object.id})
 
     def form_valid(self, form):
         form.save()
         return super(HiddenGridDetailView, self).form_valid(form)
 
 
-class VisibleGridDetailView(FormMixin, DetailView):
-    model = Grid
+class VisibleGridDetailView(GridDetailView):
     template_name = "game/grid_detail_visible.html"
-    form_class = ShotForm
 
     def get_success_url(self):
         return reverse("game:grid-detail-visible", args={self.object.id})
-
-    def get_object(self, queryset=None):
-        try:
-            my_grid = Grid.objects.get(id=self.kwargs.get("pk"))
-            return my_grid
-        except self.model.DoesNotExist:
-            raise Http404("No grid matches the given query.")
-
-    def get_initial(self):
-        return {"grid": self.object}
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        form = self.get_form()
-        if form.is_valid():
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
 
     def form_valid(self, form):
         form.save()
