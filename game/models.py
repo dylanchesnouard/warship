@@ -34,124 +34,125 @@ class Grid(models.Model):
     )  # y Axis
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def place_ships_randomly(self):
-        # logger.info("Start placing the ships")
-        nb_placement_try = 0
-        error_occurred = True
+    def place_ships_randomly(self, nb_max_attempt=MAX_PLACEMENT_TRY):
+        """
+        Place the ships randomly in the grid
+        :param nb_max_attempt: Number of max attemp to place the ships in the grid
+        :return:
+        """
+        nb_attempt = 0
+        impossible_placement = True
 
-        while error_occurred and nb_placement_try < MAX_PLACEMENT_TRY:
-            # logger.info("\tAttempt n°" + str(nb_placement_try))
-            placement_grid = self.empty_grid()
-            error_occurred = False
+        # Trying multiple time to place all the ships in the grid
+        # When the grid is small, many attempts can be needed
+        while impossible_placement and nb_attempt < nb_max_attempt:
+            # For now, the placement is possible
+            impossible_placement = False
+            # For each attempt, a fresh grid is generated
+            temp_grid = self.empty_grid()
+            # Ships that have been successfully placed are stored in a list
+            # in order to limit useless database requests
+            ships_to_be_created = []
 
-            ships_to_create = []
-            ships_to_place = []
-            ships_to_place.extend([Ship.Size.CRUISER for _ in range(NB_CRUISER)])
-            ships_to_place.extend([Ship.Size.ESCORTSHIP for _ in range(NB_ESCORTSHIP)])
-            ships_to_place.extend(
-                [Ship.Size.TORPEDOBOAT for _ in range(NB_TORPEDOBOAT)]
-            )
-            ships_to_place.extend([Ship.Size.SUBMARINE for _ in range(NB_SUBMARINE)])
-            random.shuffle(ships_to_place)
+            ships_to_be_placed = self.ships_to_be_placed()
 
-            for ship_to_place in ships_to_place:
+            # Trying to place each ship individually in the grid
+            for ship_to_be_placed in ships_to_be_placed:
                 try:
-                    ship_to_create = self.place_ship_randomly(
-                        placement_grid, ship_to_place
-                    )
-                    placement_grid = self.add_ship_to_grid(
-                        placement_grid, ship_to_create
-                    )
-                    ships_to_create.append(ship_to_create)
+                    # If the ship can be placed, a Ship object is returned
+                    # The Ship object contain the location
+                    ship_to_be_created = self.place_ship_randomly(temp_grid, ship_to_be_placed)
                 except ValueError:
-                    # logger.error("A ship can't be placed !")
-                    error_occurred = True
-                    nb_placement_try += 1
+                    # If the ship can't be placed, a ValueError is raised
+                    nb_attempt += 1
+                    impossible_placement = True
                     break
+                # If the ship have successfully been placed, he's added to the temporary grid
+                # to prevent other ship to be placed at the same location
+                temp_grid = self.add_ship_to_grid(temp_grid, ship_to_be_created)
+                # The ship is also added to the ship object lists to be created
+                # if all ships can be placed
+                ships_to_be_created.append(ship_to_be_created)
 
-            if not error_occurred:
-                Ship.objects.bulk_create(ships_to_create)
-        if error_occurred:
-            raise ValueError("Too small")
+            # If all ship can be placed, every ship object is created
+            if not impossible_placement:
+                Ship.objects.bulk_create(ships_to_be_created)
+                break
 
-    def place_ship_randomly(self, placement_grid, ship_size):
+    def place_ship_randomly(self, temp_grid, ship_size):
+        """
+        If the ship can be placed, return a Ship object that contain a possible ship location's in the grid
+        :return:
+        """
+        # List the available cells of the grid
         available_cells = [
             (row_index, cell_index)
-            for (row_index, row) in enumerate(placement_grid)
+            for (row_index, row) in enumerate(temp_grid)
             for (cell_index, cell) in enumerate(row)
             if cell == Grid.Cell.WATER
         ]
-
-        while len(available_cells) > ship_size:
-            starting_cell = random.choice(available_cells)
+        # Try different location while there is enough
+        # available cells to place the ship
+        while len(available_cells) >= ship_size:
+            # Choose a random cell from the available ones
+            origin_cell = random.choice(available_cells)
+            # For each cell, both vertical and horizontal orientation will be tested
             orientations = Ship.Orientation.choices
             random.shuffle(orientations)
+            # Test both orientation in a random order
             for orientation in orientations:
-                can_be_placed = True
-                if orientation[0] == Ship.Orientation.HORIZONTAL:
-                    for cell_x_axis in range(ship_size):
-                        if starting_cell[1] + cell_x_axis >= self.nb_columns:
-                            can_be_placed = False
-                            break
-                        if (
-                            placement_grid[starting_cell[0]][
-                                starting_cell[1] + cell_x_axis
-                            ]
-                            != Grid.Cell.WATER
-                        ):
-                            can_be_placed = False
-                            break
-                else:
-                    for cell_y_axis in range(ship_size):
-                        if starting_cell[0] + cell_y_axis >= self.nb_rows:
-                            can_be_placed = False
-                            break
-                        if (
-                            placement_grid[starting_cell[0] + cell_y_axis][
-                                starting_cell[1]
-                            ]
-                            != Grid.Cell.WATER
-                        ):
-                            can_be_placed = False
-                            break
-
-                if can_be_placed:
-                    # logger.info(
-                    #     "OK\tShip size "
-                    #     + str(ship_size)
-                    #     + "\t("
-                    #     + str(starting_cell[0])
-                    #     + ", "
-                    #     + str(starting_cell[1])
-                    #     + ")\t"
-                    #     + orientation[1]
-                    # )
-                    ship_to_create = Ship(
+                if self.ship_can_be_placed(temp_grid, origin_cell, orientation, ship_size):
+                    # The ship can be placed here
+                    # A Ship object that contain the location is returned
+                    return Ship(
                         grid=self,
-                        x=starting_cell[1],
-                        y=starting_cell[0],
+                        x=origin_cell[1],
+                        y=origin_cell[0],
                         orientation=orientation[0],
                         ship_size=ship_size,
                     )
-                    return ship_to_create
                 else:
-                    # logger.info(
-                    #     "NOK\tShip size "
-                    #     + str(ship_size)
-                    #     + "\t("
-                    #     + str(starting_cell[0])
-                    #     + ", "
-                    #     + str(starting_cell[1])
-                    #     + ")\t"
-                    #     + orientation[1]
-                    # )
-                    available_cells.remove(starting_cell)
-        # logger.info("NOK\tShip size " + str(ship_size) + "\tCan't be placed")
-        raise ValueError("Impossible de placer le navire !")
+                    # The ship can't be placed here
+                    # The tested cell is removed from available cells
+                    available_cells.remove(origin_cell)
+
+    def ship_can_be_placed(self, grid, location, orientation, ship_size):
+        """
+        Return true if the ship can be placed at this location
+        :return: bool : True if the ship can be placed at this location
+        """
+        if orientation[0] == Ship.Orientation.HORIZONTAL:
+            for cell_x_axis in range(ship_size):
+                if location[1] + cell_x_axis >= self.nb_columns:
+                    return False
+                if grid[location[0]][location[1] + cell_x_axis] != Grid.Cell.WATER:
+                    return False
+        else:
+            for cell_y_axis in range(ship_size):
+                if location[0] + cell_y_axis >= self.nb_rows:
+                    return False
+                if grid[location[0] + cell_y_axis][location[1]] != Grid.Cell.WATER:
+                    return False
+        return True
+
+    def ships_to_be_placed(self):
+        """
+        Return a ship type list to be placed in the grid
+        :return: list[Ship.Size]
+        """
+        ships_list = []
+        ships_list.extend(
+            [Ship.Size.CRUISER for _ in range(NB_CRUISER)]
+            + [Ship.Size.ESCORTSHIP for _ in range(NB_ESCORTSHIP)]
+            + [Ship.Size.TORPEDOBOAT for _ in range(NB_TORPEDOBOAT)]
+            + [Ship.Size.SUBMARINE for _ in range(NB_SUBMARINE)]
+        )
+        random.shuffle(ships_list)
+        return ships_list
 
     def regenerate_grid(self):
         """
-        Remove all shots and ships from the grid, then place new ships randoml
+        Remove all shots and ships from the grid, then place new ships randomly
         """
         # Remove all shots
         self.shots.all().delete()
