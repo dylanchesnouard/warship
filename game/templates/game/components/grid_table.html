@@ -1,12 +1,12 @@
-<table>
+<table aria-hidden="true">
     {% for row in grid %}
     <tr>
         {% for value in row %}
             {% if forloop.parentloop.first %}
-                <th>{{ value }}</th>
+                <th scope="col">{{ value }}</th>
             {% else %}
                 {% if forloop.first %}
-                    <th>{{ value }}</th>
+                    <th scope="row">{{ value }}</th>
                 {% else %}
                     <td>{{ value }}</td>
                 {% endif %}

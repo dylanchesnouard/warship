@@ -13,7 +13,7 @@
         <p>You needed {{ object.shots.all|length }} shots to sink all the ships.</p>
     {% endif %}
     <hr>
-    <table>
+    <table aria-hidden="true">
         <tr>
             <th style="padding-left: 20px;"><h2>Grid</h2></th>
             <th style="padding-left: 20px;"><h2>Shots history</h2></th>
@@ -21,7 +21,7 @@
         </tr>
         <tr>
             <td style="padding-left: 20px; vertical-align: top;">
-                <table>
+                <table aria-hidden="true">
                     <tr>
                         <td></td>
                         <td style="text-align: center;">- X -</td>
