@@ -1,0 +1,106 @@
+{% extends 'game/base.html' %}
+
+{% block body %}
+    <h1>Grid - {{ object.id }}</h1>
+    <a href="{% url 'game:grid-form' %}">Back</a>
+    <a href="{% url 'game:grid-delete' object.id %}">Delete this grid</a>
+    <a href="{% url 'game:grid-regenerate' object.id %}">(Re)generate ships</a>
+    <a href="{% url 'game:grid-detail-hidden' object.id %}">Make ships hidden</a>
+    <p>Number of rows : {{ object.nb_rows }}</p>
+    <p>Number of columns : {{ object.nb_columns }}</p>
+    {% if object.is_game_over %}
+        <h2>You have sunk all the ships, the game is over !</h2>
+        <p>You needed {{ object.shots.all|length }} shots to sink all the ships.</p>
+    {% endif %}
+    <hr>
+    <table>
+        <tr>
+            <td style="padding-left: 20px;"><h2>Grid</h2></td>
+            <td style="padding-left: 20px;"><h2>Shots history</h2></td>
+            <td style="padding-left: 20px;"><h2>Action</h2></td>
+            <td style="padding-left: 20px;"><h2>Ships location</h2></td>
+        </tr>
+        <tr>
+            <td style="padding-left: 20px; vertical-align: top;">
+                <table>
+                    <tr>
+                        <td></td>
+                        <td style="text-align: center;">- X -</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center; vertical-align: center;">|<br>Y<br>|</td>
+                        <td>
+                            <table>
+                                {% for row in object.visible_grid %}
+                                <tr>
+                                    {% for value in row %}
+                                        {% if forloop.parentloop.first %}
+                                            <th>{{ value }}</th>
+                                        {% else %}
+                                            {% if forloop.first %}
+                                                <th>{{ value }}</th>
+                                            {% else %}
+                                                <td>{{ value }}</td>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><h3>Legend :</h3>
+                            <ul>
+                                <li>~ is a <b>water</b> cell</li>
+                                <li>O is <b>missed shot</b></li>
+                                <li>X is <b>success shot</b></li>
+                                <li>S is a <b>ship</b></li>
+                                <li>- is a <b>ship safe space</b></li>
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td style="padding-left: 20px; vertical-align: top;">
+                <ul>
+                    {% for shot in object.shots.all %}
+                        <li>{{ shot }}</li>
+                    {% empty %}
+                        <li>No shot yet.</li>
+                    {% endfor %}
+                </ul>
+            </td>
+            <td style="padding-left: 20px; vertical-align: top;">
+                <form method="post">{% csrf_token %}
+                    {{ form.as_p }}
+                    <input type="submit" value="Shoot">
+                </form>
+            </td>
+            <td style="padding-left: 20px; vertical-align: top;">
+                <table style="border:1px solid black;">
+                    <tr>
+                        <th>Type</th>
+                        <th>Size</th>
+                        <th>Is sunk</th>
+                        <th>Location</th>
+                        <th>Orientation</th>
+                    </tr>
+                    {% for ship in object.ships.all %}
+                        <tr>
+                            <td>{{ ship.get_ship_size_display }}</td>
+                            <td>{{ ship.ship_size }}</td>
+                            <td>{{ ship.is_sunk }}</td>
+                            <td>{{ ship.location }}</td>
+                            <td>{{ ship.get_orientation_display }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center">No ships !</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </td>
+        </tr>
+    </table>
+{% endblock body %}

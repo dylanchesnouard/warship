@@ -6,6 +6,7 @@ omit =
     warship/asgi.py
     warship/wsgi.py
     warship/settings/**
+    game/migrations/**
 
 [report]
 fail_under = 100

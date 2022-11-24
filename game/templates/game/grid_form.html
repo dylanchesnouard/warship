@@ -1,0 +1,18 @@
+{% extends 'game/base.html' %}
+
+{% block body %}
+    <h1>Create a new grid</h1>
+    <form method="post">{% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Create">
+    </form>
+    <hr>
+    <h2>History</h2>
+    <ul>
+    {% for grid in grid_history %}
+        <li><a href="{% url 'game:grid-detail-hidden' grid.id %}">{% if grid.is_game_over == True %}[OVER] {% else %}[ONGOING] {% endif %}Grid - {{ grid.nb_columns }} columns & {{ grid.nb_rows }} rows - {{ grid.ships.all|length }} ships - {{ grid.created_at }}</a></li>
+    {% empty %}
+        <li>No grid history</li>
+    {% endfor %}
+    </ul>
+{% endblock body %}
