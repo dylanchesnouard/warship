@@ -32,6 +32,8 @@ class ShipAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "__str__",
+        "x",
+        "y",
     )
     fieldsets = (
         (

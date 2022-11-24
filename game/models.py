@@ -111,10 +111,10 @@ class Grid(models.Model):
                         orientation=orientation[0],
                         ship_size=ship_size,
                     )
-                else:
-                    # The ship can't be placed here
-                    # The tested cell is removed from available cells
-                    available_cells.remove(origin_cell)
+            # The ship can't be placed here
+            # The tested cell is removed from available cells
+            available_cells.remove(origin_cell)
+        raise ValueError("The ship can't be placed")
 
     def ship_can_be_placed(self, grid, location, orientation, ship_size):
         """
