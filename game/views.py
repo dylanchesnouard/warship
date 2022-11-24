@@ -1,14 +1,97 @@
-from django.shortcuts import render
-from django.views.generic.base import TemplateView
+from django.views.generic.edit import CreateView, DeleteView
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import FormMixin
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect
+from django.shortcuts import reverse
+from django.urls import reverse_lazy
+from .models import Grid
+from .forms import ShotForm
+from django.http import Http404
 
 
 # Create your views here.
-class HomePageView(TemplateView):
-    template_name = 'game/base.html'
+class GridCreateView(CreateView):
+    model = Grid
+    fields = ["nb_rows", "nb_columns"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["grid_history"] = Grid.objects.all()
         return context
 
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name, self.get_context_data())
+    def get_success_url(self):
+        return reverse("game:grid-detail-hidden", args=(self.object.id,))
+
+
+class GridDeleteView(DeleteView):
+    model = Grid
+    success_url = reverse_lazy("game:grid-form")
+
+
+class HiddenGridDetailView(FormMixin, DetailView):
+    model = Grid
+    template_name = "game/grid_detail_hidden.html"
+    form_class = ShotForm
+
+    def get_success_url(self):
+        return reverse("game:grid-detail-hidden", args={self.object.id})
+
+    def get_object(self, queryset=None):
+        try:
+            my_grid = Grid.objects.get(id=self.kwargs.get("pk"))
+            return my_grid
+        except self.model.DoesNotExist:
+            raise Http404("No grid matches the given query.")
+
+    def get_initial(self):
+        return {"grid": self.object}
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        form.save()
+        return super(HiddenGridDetailView, self).form_valid(form)
+
+
+class VisibleGridDetailView(FormMixin, DetailView):
+    model = Grid
+    template_name = "game/grid_detail_visible.html"
+    form_class = ShotForm
+
+    def get_success_url(self):
+        return reverse("game:grid-detail-visible", args={self.object.id})
+
+    def get_object(self, queryset=None):
+        try:
+            my_grid = Grid.objects.get(id=self.kwargs.get("pk"))
+            return my_grid
+        except self.model.DoesNotExist:
+            raise Http404("No grid matches the given query.")
+
+    def get_initial(self):
+        return {"grid": self.object}
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        form.save()
+        return super(VisibleGridDetailView, self).form_valid(form)
+
+
+def grid_regenerate(request, pk):
+    grid = get_object_or_404(Grid, id=pk)
+    grid.regenerate_grid()
+    return HttpResponseRedirect(reverse("game:grid-detail-hidden", args=(pk,)))

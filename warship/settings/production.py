@@ -28,9 +28,9 @@ DATABASES = {
 # Static root
 # https://docs.djangoproject.com/en/4.1/ref/settings/#static-root
 
-STATIC_ROOT = 'static/'
+STATIC_ROOT = "static/"
 
 # Media root
 # https://docs.djangoproject.com/en/4.1/ref/settings/#media-root
 
-MEDIA_ROOT = 'media/'
+MEDIA_ROOT = "media/"
