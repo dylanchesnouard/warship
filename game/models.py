@@ -350,6 +350,11 @@ class Ship(models.Model):
     )
 
     def is_hit(self, shot):
+        """
+        Return True if the ship is hit by the shot
+        :param shot: Shot object
+        :return: bool : True if the ship is hit
+        """
         if self.orientation[0] == Ship.Orientation.HORIZONTAL:
             if shot.y - 1 == self.y and self.x <= shot.x - 1 < self.x + self.ship_size:
                 return True
@@ -360,6 +365,10 @@ class Ship(models.Model):
 
     @property
     def is_sunk(self):
+        """
+        Return True if every cell of the ship have been hit
+        :return: bool : True if the ship is sunk
+        """
         if self.orientation[0] == Ship.Orientation.HORIZONTAL:
             ship_cells = [(self.y, self.x + offset) for offset in range(self.ship_size)]
         else:
@@ -372,10 +381,18 @@ class Ship(models.Model):
 
     @property
     def location(self):
+        """
+        Return ship location
+        :return: x, y
+        """
         return self.x + 1, self.y + 1
 
     @property
     def get_tiles(self):
+        """
+        Return a grid representing the ship and his safe space
+        :return: list[list[Cell]] : representing the ship
+        """
         if self.orientation[0] == Ship.Orientation.HORIZONTAL:
             ship_tiles = [
                 [Grid.Cell.SHIP_SAFE_SPACE for _ in range(self.ship_size + 2)]
