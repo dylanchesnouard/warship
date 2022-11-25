@@ -1,15 +1,15 @@
 <table class="table table-bordered table-sm" aria-hidden="true">
     <thead>
         <tr>
-            <th scope="col"></th>
-            <th scope="col" colspan="{{ grid.1|length }}">X</th>
+            <th scope="col" class="bg-light"></th>
+            <th scope="col" class="bg-light" colspan="{{ grid.1|length }}">X</th>
         </tr>
     </thead>
     <tbody>
         {% for row in grid %}
             <tr>
                 {% if forloop.first %}
-                    <th scope="col" rowspan="{{ grid|length }}" class="align-middle">Y</th>
+                    <th scope="col" rowspan="{{ grid|length }}" class="align-middle bg-light">Y</th>
                 {% endif %}
                 {% for value in row %}
                     {% if forloop.parentloop.first %}
