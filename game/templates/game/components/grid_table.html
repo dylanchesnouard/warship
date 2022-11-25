@@ -1,17 +1,28 @@
-<table aria-hidden="true">
-    {% for row in grid %}
-    <tr>
-        {% for value in row %}
-            {% if forloop.parentloop.first %}
-                <th scope="col">{{ value }}</th>
-            {% else %}
+<table class="table table-bordered table-sm" aria-hidden="true">
+    <thead>
+        <tr>
+            <th scope="col"></th>
+            <th scope="col" colspan="{{ grid.1|length }}">X</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in grid %}
+            <tr>
                 {% if forloop.first %}
-                    <th scope="row">{{ value }}</th>
-                {% else %}
-                    <td>{{ value }}</td>
+                    <th scope="col" rowspan="{{ grid|length }}" class="align-middle">Y</th>
                 {% endif %}
-            {% endif %}
+                {% for value in row %}
+                    {% if forloop.parentloop.first %}
+                        <th scope="col">{{ value }}</th>
+                    {% else %}
+                        {% if forloop.first %}
+                            <th scope="row">{{ value }}</th>
+                        {% else %}
+                            <td>{{ value }}</td>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </tr>
         {% endfor %}
-    </tr>
-    {% endfor %}
+    </tbody>
 </table>

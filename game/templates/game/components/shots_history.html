@@ -1,7 +1,26 @@
-<ul>
-    {% for shot in object.shots.all %}
-        <li>{{ shot }}</li>
-    {% empty %}
-        <li>No shot yet.</li>
-    {% endfor %}
-</ul>
+<table class="table table-striped" aria-hidden="true">
+    <thead>
+        <tr>
+            <th>Success/Miss</th>
+            <th>Location</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for shot in object.shots.all %}
+            <tr>
+                <td>
+                    {% if shot.is_successful == True %}
+                        Successful shot
+                    {% else %}
+                        Missed shot
+                    {% endif %}
+                </td>
+                <td>({{ shot.x }}, {{ shot.y }})</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="2" class="text-center">No shots !</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

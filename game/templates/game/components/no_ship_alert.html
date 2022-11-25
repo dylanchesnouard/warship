@@ -1,0 +1,8 @@
+{% if object.ships.all|length == 0 %}
+    <div class="container pt-3">
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">There is no ship !</h4>
+            <p>Click <a href="{% url 'game:grid-regenerate' object.id %}">here</a> or on the "(Re)generate ships" button !</p>
+        </div>
+    </div>
+{% endif %}

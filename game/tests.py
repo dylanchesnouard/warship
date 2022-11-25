@@ -81,7 +81,9 @@ class GridModelTest(TestCase):
         a_random_ship = self.grid.ships.all().first()
         # Check that the ship is visible
         # Add offset due to headers
-        self.assertEqual(Grid.Cell.SHIP, visible_grid[a_random_ship.y + 1][a_random_ship.x + 1])
+        self.assertEqual(
+            Grid.Cell.SHIP, visible_grid[a_random_ship.y + 1][a_random_ship.x + 1]
+        )
 
     def test_grid_hidden_grid(self):
         # Regenerate the grid
@@ -92,11 +94,15 @@ class GridModelTest(TestCase):
         a_random_ship = self.grid.ships.all().first()
         # Check that the ship is not visible
         # Add offset due to headers
-        self.assertIn(Grid.Cell.WATER, hidden_grid[a_random_ship.y + 1][a_random_ship.x + 1])
+        self.assertIn(
+            Grid.Cell.WATER, hidden_grid[a_random_ship.y + 1][a_random_ship.x + 1]
+        )
 
     def test_grid_is_game_over(self):
         # Generate a ships list of 1 submarine to be placed
-        ships_list = Grid.ships_to_be_placed(nb_cruiser=0, nb_torpedoboat=0, nb_escortship=0, nb_submarine=1)
+        ships_list = Grid.ships_to_be_placed(
+            nb_cruiser=0, nb_torpedoboat=0, nb_escortship=0, nb_submarine=1
+        )
         # Regenerate the grid with the ships list
         self.grid.regenerate_grid(ships_list=ships_list)
         # Check that there is only 1 ship in the grid
@@ -114,12 +120,16 @@ class GridModelTest(TestCase):
         self.assertEqual(self.grid.is_game_over, True)
 
     def test_grid_ships_to_be_placed(self):
-        ships_list = Grid.ships_to_be_placed(nb_cruiser=1, nb_torpedoboat=0, nb_escortship=0, nb_submarine=0)
+        ships_list = Grid.ships_to_be_placed(
+            nb_cruiser=1, nb_torpedoboat=0, nb_escortship=0, nb_submarine=0
+        )
         self.assertEqual(ships_list, [Ship.Size.CRUISER])
 
     def test_add_shot_to_grid(self):
         # Generate a ships list of 1 submarine to be placed
-        ships_list = Grid.ships_to_be_placed(nb_cruiser=0, nb_torpedoboat=0, nb_escortship=0, nb_submarine=1)
+        ships_list = Grid.ships_to_be_placed(
+            nb_cruiser=0, nb_torpedoboat=0, nb_escortship=0, nb_submarine=1
+        )
         # Regenerate the grid with the ships list
         self.grid.regenerate_grid(ships_list=ships_list)
         # Get the submarine location
@@ -132,7 +142,9 @@ class GridModelTest(TestCase):
             y=the_submarine.y + 1,
         )
         # Check the cell after the shoot
-        self.assertEqual(self.grid.grid[the_submarine.y][the_submarine.x], Grid.Cell.SHOT_SUCCESS)
+        self.assertEqual(
+            self.grid.grid[the_submarine.y][the_submarine.x], Grid.Cell.SHOT_SUCCESS
+        )
 
 
 class ShipModelTest(TestCase):

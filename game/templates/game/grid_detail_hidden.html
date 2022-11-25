@@ -1,50 +1,39 @@
 {% extends 'game/base.html' %}
 
 {% block body %}
-    <h1>Grid - {{ object.id }}</h1>
-    <a href="{% url 'game:grid-form' %}">Back</a>
-    <a href="{% url 'game:grid-delete' object.id %}">Delete this grid</a>
-    <a href="{% url 'game:grid-regenerate' object.id %}">(Re)generate ships</a>
-    <a href="{% url 'game:grid-detail-visible' object.id %}">Make ships visible</a>
-    <p>Number of rows : {{ object.nb_rows }}</p>
-    <p>Number of columns : {{ object.nb_columns }}</p>
-    {% if object.is_game_over %}
-        <h2>You have sunk all the ships, the game is over !</h2>
-        <p>You needed {{ object.shots.all|length }} shots to sink all the ships.</p>
-    {% endif %}
-    <hr>
-    <table aria-hidden="true">
-        <tr>
-            <th style="padding-left: 20px;"><h2>Grid</h2></th>
-            <th style="padding-left: 20px;"><h2>Shots history</h2></th>
-            <th style="padding-left: 20px;"><h2>Action</h2></th>
-        </tr>
-        <tr>
-            <td style="padding-left: 20px; vertical-align: top;">
-                <table aria-hidden="true">
-                    <tr>
-                        <td></td>
-                        <td style="text-align: center;">- X -</td>
-                    </tr>
-                    <tr>
-                        <td style="text-align: center; vertical-align: center;">|<br>Y<br>|</td>
-                        <td>
-                            {% include "game/components/grid_table.html" with grid=object.hidden_grid %}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2"><h3>Legend :</h3>
-                            {% include "game/components/grid_table_legend.html" with full_legend=False %}
-                        </td>
-                    </tr>
-                </table>
-            </td>
-            <td style="padding-left: 20px; vertical-align: top;">
-                {% include "game/components/shots_history.html" %}
-            </td>
-            <td style="padding-left: 20px; vertical-align: top;">
-                {% include "game/components/shot_form.html" %}
-            </td>
-        </tr>
-    </table>
+    <div class="bg-light">
+        <div class="container pb-3 bg-light">
+            <h1 class="display-3">Warship</h1>
+            <a href="{% url 'game:grid-form' %}" type="button" class="btn btn-outline-primary mr-3">Back</a>
+            <a href="{% url 'game:grid-detail-visible' object.id %}" type="button" class="btn btn-outline-primary mr-3">Make ship visible</a>
+            <a href="{% url 'game:grid-regenerate' object.id %}" type="button" class="btn btn-outline-primary mr-3">(Re)generate ships</a>
+            <a href="{% url 'game:grid-delete' object.id %}" type="button" class="btn btn-outline-danger mr-3">Delete this grid</a>
+        </div>
+    </div>
+    {% include "game/components/game_over_alert.html" %}
+    {% include "game/components/no_ship_alert.html" %}
+
+    <div class="row text-center">
+        <div class="col-md-3">
+            <h3>Shot history</h3>
+        </div>
+        <div class="col-md-6">
+            <h3>The grid</h3>
+        </div>
+        <div class="col-md-3">
+            <h3>Shot form</h3>
+        </div>
+    </div>
+    <div class="row text-center">
+        <div class="col-md-3">
+            {% include "game/components/shots_history.html" %}
+        </div>
+        <div class="col-md-6">
+            {% include "game/components/grid_table.html" with grid=object.hidden_grid %}
+            {% include "game/components/grid_table_legend.html" with full_legend=False %}
+        </div>
+        <div class="col-md-3">
+            {% include "game/components/shot_form.html" %}
+        </div>
+    </div>
 {% endblock body %}

@@ -1,4 +1,23 @@
-<form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Shoot">
-</form>
+{% for error in form.non_field_errors %}
+    <div class="alert alert-danger">
+        {{ error|escape }}
+    </div>
+{% endfor %}
+<div class="container" style="max-width: 300px;">
+    <form method="post">{% csrf_token %}
+        {% for field in form %}
+            <div class="form-group row mb-2">
+                {% for error in field.errors %}
+                    <div class="alert alert-danger">
+                        {{ error|escape }}
+                    </div>
+                {% endfor %}
+                <label for="{{ field.id_for_label }}" class="col-sm-3 col-form-label" style="display: {% if field.is_hidden %}none{% else %}block{% endif %};">{{ field.label }}</label>
+                <div class="col-sm-9">
+                    <input type="{% if field.is_hidden %}hidden{% else %}number{% endif %}" class="form-control" id="{{ field.id_for_label }}" name="{{ field.name }}" value="{{ field.value }}" required>
+                </div>
+            </div>
+        {% endfor %}
+        <input type="submit" class="btn btn-primary" value="Shoot">
+    </form>
+</div>

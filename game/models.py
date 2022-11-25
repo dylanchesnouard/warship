@@ -54,14 +54,16 @@ class Grid(models.Model):
             # in order to limit useless database requests
             ships_to_be_created = []
 
-            ships_to_be_placed = kwargs.get('ships_list', self.ships_to_be_placed())
+            ships_to_be_placed = kwargs.get("ships_list", self.ships_to_be_placed())
 
             # Trying to place each ship individually in the grid
             for ship_to_be_placed in ships_to_be_placed:
                 try:
                     # If the ship can be placed, a Ship object is returned
                     # The Ship object contain the location
-                    ship_to_be_created = self.place_ship_randomly(temp_grid, ship_to_be_placed)
+                    ship_to_be_created = self.place_ship_randomly(
+                        temp_grid, ship_to_be_placed
+                    )
                 except ValueError:
                     # If the ship can't be placed, a ValueError is raised
                     nb_attempt += 1
@@ -101,7 +103,9 @@ class Grid(models.Model):
             random.shuffle(orientations)
             # Test both orientation in a random order
             for orientation in orientations:
-                if self.ship_can_be_placed(temp_grid, origin_cell, orientation, ship_size):
+                if self.ship_can_be_placed(
+                    temp_grid, origin_cell, orientation, ship_size
+                ):
                     # The ship can be placed here
                     # A Ship object that contain the location is returned
                     return Ship(
@@ -144,10 +148,19 @@ class Grid(models.Model):
         ships_list = []
 
         ships_list.extend(
-            [Ship.Size.CRUISER for _ in range(kwargs.get('nb_cruiser', NB_CRUISER))]
-            + [Ship.Size.ESCORTSHIP for _ in range(kwargs.get('nb_escortship', NB_ESCORTSHIP))]
-            + [Ship.Size.TORPEDOBOAT for _ in range(kwargs.get('nb_torpedoboat', NB_TORPEDOBOAT))]
-            + [Ship.Size.SUBMARINE for _ in range(kwargs.get('nb_submarine', NB_SUBMARINE))]
+            [Ship.Size.CRUISER for _ in range(kwargs.get("nb_cruiser", NB_CRUISER))]
+            + [
+                Ship.Size.ESCORTSHIP
+                for _ in range(kwargs.get("nb_escortship", NB_ESCORTSHIP))
+            ]
+            + [
+                Ship.Size.TORPEDOBOAT
+                for _ in range(kwargs.get("nb_torpedoboat", NB_TORPEDOBOAT))
+            ]
+            + [
+                Ship.Size.SUBMARINE
+                for _ in range(kwargs.get("nb_submarine", NB_SUBMARINE))
+            ]
         )
         random.shuffle(ships_list)
         return ships_list
@@ -161,8 +174,8 @@ class Grid(models.Model):
         # Remove all ships
         self.ships.all().delete()
         # Place new ships randomly
-        if 'ships_list' in kwargs:
-            self.place_ships_randomly(ships_list=kwargs.get('ships_list'))
+        if "ships_list" in kwargs:
+            self.place_ships_randomly(ships_list=kwargs.get("ships_list"))
         else:
             self.place_ships_randomly()
 

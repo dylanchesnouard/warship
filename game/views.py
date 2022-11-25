@@ -16,6 +16,7 @@ class GridCreateView(CreateView):
     """
     Allows the creation of a new Grid and see the list of grid already created
     """
+
     model = Grid
     fields = ["nb_rows", "nb_columns"]
 
@@ -34,6 +35,7 @@ class GridDeleteView(DeleteView):
     """
     Allows to delete a grid, then redirect to the creation grid page
     """
+
     model = Grid
     success_url = reverse_lazy("game:grid-form")
 
@@ -43,6 +45,7 @@ class GridDetailView(FormMixin, DetailView):
     Only used by HiddenGridDetailView and VisibleGridDetailView !
     Allow to see the grid and shoot
     """
+
     model = Grid
     form_class = ShotForm
 
@@ -73,6 +76,7 @@ class HiddenGridDetailView(GridDetailView):
     Inherits from GridDetailView
     Display a hidden grid, only water and shot are visible
     """
+
     template_name = "game/grid_detail_hidden.html"
 
     def get_success_url(self):
@@ -89,6 +93,7 @@ class VisibleGridDetailView(GridDetailView):
     Display a visible grid (ships and ships safe space are visible)
     Display a detailed ships list
     """
+
     template_name = "game/grid_detail_visible.html"
 
     def get_success_url(self):
