@@ -245,6 +245,30 @@ class Grid(models.Model):
         else:
             return False
 
+    @property
+    def nb_sunken_ships(self):
+        """
+        Return the number of sunken ships
+        :return: int : Number of sunken ships
+        """
+        nb_sunken_ships = 0
+        for ship in self.ships.all():
+            if ship.is_sunk:
+                nb_sunken_ships += 1
+        return nb_sunken_ships
+
+    @property
+    def nb_remaining_ships(self):
+        """
+        Return the number of remaining ships
+        :return: int : Number of remaining ships
+        """
+        nb_remaining_ships = 0
+        for ship in self.ships.all():
+            if not ship.is_sunk:
+                nb_remaining_ships += 1
+        return nb_remaining_ships
+
     def add_headers(self, grid):
         """
         Add headers to the grid passed in param
@@ -442,9 +466,18 @@ class Shot(models.Model):
         Return True if the shot hit a ship
         :return: bool : True if the shot hit a ship
         """
+        if self.hit_ship is not None:
+            return True
+
+    @property
+    def hit_ship(self):
+        """
+        If the shot hit a ship, return the ship
+        :return: Ship : the ship that have been hit
+        """
         for ship in self.grid.ships.all():
             if ship.is_hit(self):
-                return True
+                return ship
 
     class Meta:
         verbose_name = "Shot"

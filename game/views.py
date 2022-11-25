@@ -4,6 +4,7 @@ from django.views.generic.edit import FormMixin
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect
+from django.contrib import messages
 from django.shortcuts import reverse
 from django.urls import reverse_lazy
 from .models import Grid
@@ -83,7 +84,11 @@ class HiddenGridDetailView(GridDetailView):
         return reverse("game:grid-detail-hidden", args={self.object.id})
 
     def form_valid(self, form):
-        form.save()
+        the_shot = form.save()
+        if the_shot.is_successful:
+            hit_ship = the_shot.hit_ship
+            if hit_ship.is_sunk:
+                messages.success(self.request, "You sunk a ship !")
         return super(HiddenGridDetailView, self).form_valid(form)
 
 
@@ -100,7 +105,11 @@ class VisibleGridDetailView(GridDetailView):
         return reverse("game:grid-detail-visible", args={self.object.id})
 
     def form_valid(self, form):
-        form.save()
+        the_shot = form.save()
+        if the_shot.is_successful:
+            hit_ship = the_shot.hit_ship
+            if hit_ship.is_sunk:
+                messages.success(self.request, "You sunk a ship !")
         return super(VisibleGridDetailView, self).form_valid(form)
 
 

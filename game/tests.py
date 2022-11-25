@@ -172,6 +172,8 @@ class ShipModelTest(TestCase):
         self.assertEqual(self.ship.is_hit(a_shot), True)
         # Check that the ship is not sunk
         self.assertEqual(self.ship.is_sunk, False)
+        # Check that no ships are sunk
+        self.assertEqual(self.grid.nb_sunken_ships, 0)
         # Add a second shot on the ship
         a_second_shot = Shot(
             grid=self.grid,
@@ -183,6 +185,8 @@ class ShipModelTest(TestCase):
         self.assertEqual(self.ship.is_hit(a_second_shot), True)
         # Check that the ship is sunk
         self.assertEqual(self.ship.is_sunk, True)
+        # Check that a ship is sunk
+        self.assertEqual(self.grid.nb_sunken_ships, 1)
 
     def test_ship_location(self):
         self.assertEqual(self.ship.location, (self.ship.x + 1, self.ship.y + 1))
@@ -211,3 +215,5 @@ class ShotModelTest(TestCase):
         a_shot.save()
         # Check that the shot was successful
         self.assertEqual(a_shot.is_successful, True)
+        # Check that the shot hit the submarine
+        self.assertEqual(a_shot.hit_ship, self.ship)
