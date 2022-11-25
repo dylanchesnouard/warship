@@ -2,7 +2,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory, TestCase
 
 from .views import GridCreateView
-from .models import Grid
+from .models import Grid, Ship, Shot
 
 
 # Create your tests here.
@@ -52,11 +52,20 @@ class GridModelTest(TestCase):
     def test_grid_grid(self):
         # Regenerate the grid
         self.grid.regenerate_grid()
-        # Get the x index of the ship
-        # Add a 2 offset for headers and 0 index
-        row_index = self.grid.ships.all().first().y + 1
-        # Check that the ship is in the grid
-        self.assertIn(Grid.Cell.SHIP, self.grid.visible_grid[row_index])
+        # Add a shot
+        Shot.objects.create(
+            grid=self.grid,
+            x=1,
+            y=1,
+        )
+        # Get the grid
+        grid = self.grid.grid
+        # Get a ship of the grid
+        a_random_ship = self.grid.ships.all().first()
+        # Check that the ship is visible
+        self.assertEqual(Grid.Cell.SHIP, grid[a_random_ship.y][a_random_ship.x])
+        # Check that the shot is visible (missed or successful)
+        self.assertIn(grid[0][0], (Grid.Cell.SHOT_MISS, Grid.Cell.SHOT_SUCCESS))
 
     def test_grid_visible_grid(self):
         # Regenerate the grid
@@ -70,7 +79,7 @@ class GridModelTest(TestCase):
         self.assertEqual(visible_grid[0][0], "")
         # Get a ship of the grid
         a_random_ship = self.grid.ships.all().first()
-        # Check that the ship is not visible
+        # Check that the ship is visible
         # Add offset due to headers
         self.assertEqual(Grid.Cell.SHIP, visible_grid[a_random_ship.y + 1][a_random_ship.x + 1])
 
@@ -85,3 +94,14 @@ class GridModelTest(TestCase):
         # Add offset due to headers
         self.assertIn(Grid.Cell.WATER, hidden_grid[a_random_ship.y + 1][a_random_ship.x + 1])
 
+    def test_grid_is_game_over(self):
+        # Generate a ships list of 1 submarine to be placed
+        ships_list = Grid.ships_to_be_placed(nb_cruiser=0, nb_torpedoboat=0, nb_escortship=0, nb_submarine=1)
+        # Regenerate the grid with the ships list
+        self.grid.regenerate_grid(ships_list=ships_list)
+        # Check that there is only 1 ship in the grid
+        self.assertEqual(self.grid.ships.count(), 1)
+
+    def test_grid_ships_to_be_placed(self):
+        ships_list = Grid.ships_to_be_placed(nb_cruiser=1, nb_torpedoboat=0, nb_escortship=0, nb_submarine=0)
+        self.assertEqual(ships_list, [Ship.Size.CRUISER])

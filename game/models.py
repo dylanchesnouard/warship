@@ -34,7 +34,7 @@ class Grid(models.Model):
     )  # y Axis
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def place_ships_randomly(self, nb_max_attempt=MAX_PLACEMENT_TRY):
+    def place_ships_randomly(self, nb_max_attempt=MAX_PLACEMENT_TRY, **kwargs):
         """
         Place the ships randomly in the grid
         :param nb_max_attempt: Number of max attemp to place the ships in the grid
@@ -54,7 +54,7 @@ class Grid(models.Model):
             # in order to limit useless database requests
             ships_to_be_created = []
 
-            ships_to_be_placed = self.ships_to_be_placed()
+            ships_to_be_placed = kwargs.get('ships_list', self.ships_to_be_placed())
 
             # Trying to place each ship individually in the grid
             for ship_to_be_placed in ships_to_be_placed:
@@ -135,22 +135,24 @@ class Grid(models.Model):
                     return False
         return True
 
-    def ships_to_be_placed(self):
+    @staticmethod
+    def ships_to_be_placed(**kwargs):
         """
         Return a ship type list to be placed in the grid
         :return: list[Ship.Size]
         """
         ships_list = []
+
         ships_list.extend(
-            [Ship.Size.CRUISER for _ in range(NB_CRUISER)]
-            + [Ship.Size.ESCORTSHIP for _ in range(NB_ESCORTSHIP)]
-            + [Ship.Size.TORPEDOBOAT for _ in range(NB_TORPEDOBOAT)]
-            + [Ship.Size.SUBMARINE for _ in range(NB_SUBMARINE)]
+            [Ship.Size.CRUISER for _ in range(kwargs.get('nb_cruiser', NB_CRUISER))]
+            + [Ship.Size.ESCORTSHIP for _ in range(kwargs.get('nb_escortship', NB_ESCORTSHIP))]
+            + [Ship.Size.TORPEDOBOAT for _ in range(kwargs.get('nb_torpedoboat', NB_TORPEDOBOAT))]
+            + [Ship.Size.SUBMARINE for _ in range(kwargs.get('nb_submarine', NB_SUBMARINE))]
         )
         random.shuffle(ships_list)
         return ships_list
 
-    def regenerate_grid(self):
+    def regenerate_grid(self, **kwargs):
         """
         Remove all shots and ships from the grid, then place new ships randomly
         """
@@ -159,7 +161,10 @@ class Grid(models.Model):
         # Remove all ships
         self.ships.all().delete()
         # Place new ships randomly
-        self.place_ships_randomly()
+        if 'ships_list' in kwargs:
+            self.place_ships_randomly(ships_list=kwargs.get('ships_list'))
+        else:
+            self.place_ships_randomly()
 
     @property
     def visible_grid(self):
