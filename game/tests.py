@@ -101,7 +101,101 @@ class GridModelTest(TestCase):
         self.grid.regenerate_grid(ships_list=ships_list)
         # Check that there is only 1 ship in the grid
         self.assertEqual(self.grid.ships.count(), 1)
+        # Get the submarine location
+        the_submarine = self.grid.ships.all().first()
+        # Shoot the submarine
+        # Offset due to the 0 index grid
+        Shot.objects.create(
+            grid=self.grid,
+            x=the_submarine.x + 1,
+            y=the_submarine.y + 1,
+        )
+        # Check if the game is over
+        self.assertEqual(self.grid.is_game_over, True)
 
     def test_grid_ships_to_be_placed(self):
         ships_list = Grid.ships_to_be_placed(nb_cruiser=1, nb_torpedoboat=0, nb_escortship=0, nb_submarine=0)
         self.assertEqual(ships_list, [Ship.Size.CRUISER])
+
+    def test_add_shot_to_grid(self):
+        # Generate a ships list of 1 submarine to be placed
+        ships_list = Grid.ships_to_be_placed(nb_cruiser=0, nb_torpedoboat=0, nb_escortship=0, nb_submarine=1)
+        # Regenerate the grid with the ships list
+        self.grid.regenerate_grid(ships_list=ships_list)
+        # Get the submarine location
+        the_submarine = self.grid.ships.all().first()
+        # Shoot the submarine
+        # Offset due to the 0 index grid
+        Shot.objects.create(
+            grid=self.grid,
+            x=the_submarine.x + 1,
+            y=the_submarine.y + 1,
+        )
+        # Check the cell after the shoot
+        self.assertEqual(self.grid.grid[the_submarine.y][the_submarine.x], Grid.Cell.SHOT_SUCCESS)
+
+
+class ShipModelTest(TestCase):
+    def setUp(self):
+        self.grid = Grid()
+        self.grid.save()
+        self.ship = Ship(
+            grid=self.grid,
+            x=0,
+            y=0,
+            orientation=Ship.Orientation.HORIZONTAL,
+            ship_size=Ship.Size.TORPEDOBOAT,
+        )
+        self.ship.save()
+
+    def test_ship_is_hit_and_sunk(self):
+        # Add a shot on the ship
+        a_shot = Shot(
+            grid=self.grid,
+            x=self.ship.x + 1,
+            y=self.ship.y + 1,
+        )
+        a_shot.save()
+        # Check that the ship was hit
+        self.assertEqual(self.ship.is_hit(a_shot), True)
+        # Check that the ship is not sunk
+        self.assertEqual(self.ship.is_sunk, False)
+        # Add a second shot on the ship
+        a_second_shot = Shot(
+            grid=self.grid,
+            x=self.ship.x + 2,
+            y=self.ship.y + 1,
+        )
+        a_second_shot.save()
+        # Check that the ship was hit
+        self.assertEqual(self.ship.is_hit(a_second_shot), True)
+        # Check that the ship is sunk
+        self.assertEqual(self.ship.is_sunk, True)
+
+    def test_ship_location(self):
+        self.assertEqual(self.ship.location, (self.ship.x + 1, self.ship.y + 1))
+
+
+class ShotModelTest(TestCase):
+    def setUp(self):
+        self.grid = Grid()
+        self.grid.save()
+        self.ship = Ship(
+            grid=self.grid,
+            x=0,
+            y=0,
+            orientation=Ship.Orientation.HORIZONTAL,
+            ship_size=Ship.Size.TORPEDOBOAT,
+        )
+        self.ship.save()
+
+    def test_shot_is_successful(self):
+        # Add a shot on the ship
+        a_shot = Shot(
+            grid=self.grid,
+            x=self.ship.x + 1,
+            y=self.ship.y + 1,
+        )
+        a_shot.save()
+        # Check that the shot was successful
+        self.assertEqual(a_shot.is_successful, True)
