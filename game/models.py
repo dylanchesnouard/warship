@@ -399,7 +399,7 @@ class Ship(models.Model):
             ship_cells = [(self.y + offset, self.x) for offset in range(self.ship_size)]
 
         for cell in ship_cells:
-            if not Shot.objects.filter(Q(x=cell[1] + 1) & Q(y=cell[0] + 1)).exists():
+            if not self.grid.shots.filter(Q(x=cell[1] + 1) & Q(y=cell[0] + 1)).exists():
                 return False
         return True
 
