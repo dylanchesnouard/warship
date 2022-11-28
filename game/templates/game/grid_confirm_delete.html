@@ -1,0 +1,15 @@
+{% extends 'game/base.html' %}
+
+{% block body %}
+    <main class="container mt-5">
+        <div class="bg-light p-5 rounded">
+            <h1>Confirm deletion ?</h1>
+            <form method="post">{% csrf_token %}
+                <p class="lead">Are you sure you want to delete "{{ object }}"?</p>
+                {{ form }}
+                <input type="submit" class="btn btn-danger" value="Confirm">
+                <a href="{% url 'game:grid-detail-hidden' object.id %}" class="btn btn-primary">Cancel</a>
+            </form>
+        </div>
+    </main>
+{% endblock body %}

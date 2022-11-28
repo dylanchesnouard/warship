@@ -1,0 +1,9 @@
+{% if object.is_game_over %}
+    <div class="container pt-3">
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">Well done!</h4>
+            <p>You have sunk all the ships, the game is over !</p>
+            <p>It took you <strong>{{ object.shots.all|length }}</strong> shots to sink all the ships.</p>
+        </div>
+    </div>
+{% endif %}
